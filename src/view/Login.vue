@@ -47,10 +47,9 @@ export default {
                     var loginParams = { loginName: this.ruleForm2.loginName, loginPassword: this.ruleForm2.loginPassword };
                     requestLogin(loginParams).then(data => {
                         this.logining = false;
-                        //let { msg, code, user } = data;
                         if (data == '') {
                             this.$message({
-                                message: msg,
+                                message: '登录失败，请检查用户名和密码是否正确。',
                                 type: 'error'
                             });
                         } else {
