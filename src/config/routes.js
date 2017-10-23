@@ -4,6 +4,7 @@ import NotFound from '../view/PageNotFound.vue'
 import Home from '../view/Home.vue'
 import FirstPage from '../view/document/FirstPage.vue'
 import SecondPage from '../view/system/SecondPage.vue'
+import ActionLogList from '../view/system/ActionLogList.vue'
 
 let routes = [
     {
@@ -34,7 +35,7 @@ let routes = [
         children: [
             { path: '/p21', component: Todo, name: '用户及权限管理' },
             { path: '/p22', component: Todo, name: '项目文档配置' },
-            { path: '/p23', component: Todo, name: '查看操作日志' }
+            { path: '/log', component: ActionLogList, name: '查看操作日志' }
         ]
     },
     {

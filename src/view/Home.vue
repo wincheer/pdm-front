@@ -139,7 +139,8 @@ export default {
         if (user) {
             user = JSON.parse(user);
             this.sysUserName = user.displayName;
-            this.sysUserAvatar = 'https://raw.githubusercontent.com/taylorchen709/markdown-images/master/vueadmin/user.png';
+            //this.sysUserAvatar = 'https://raw.githubusercontent.com/taylorchen709/markdown-images/master/vueadmin/user.png';
+            this.sysUserAvatar = require('../assets/avatar.jpg');
         }
 
     }
