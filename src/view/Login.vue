@@ -5,7 +5,7 @@
             <el-input type="text" v-model="ruleForm2.loginName" auto-complete="off" placeholder="账号"></el-input>
         </el-form-item>
         <el-form-item prop="loginPassword">
-            <el-input type="loginPassword" v-model="ruleForm2.checkPass" auto-complete="off" placeholder="密码"></el-input>
+            <el-input type="password" v-model="ruleForm2.loginPassword" auto-complete="off" placeholder="密码"></el-input>
         </el-form-item>
         <el-checkbox v-model="checked" checked class="remember">记住密码</el-checkbox>
         <el-form-item style="width:100%;">
@@ -22,7 +22,7 @@ export default {
             logining: false,
             ruleForm2: {
                 loginName: 'admin',
-                loginPassword: '123456'
+                loginPassword: 'iDatapdm2017'
             },
             rules2: {
                 loginName: [
@@ -47,19 +47,17 @@ export default {
                     var loginParams = { loginName: this.ruleForm2.loginName, loginPassword: this.ruleForm2.loginPassword };
                     requestLogin(loginParams).then(data => {
                         this.logining = false;
-                        let { msg, code, user } = data;
-                        if (code !== 200) {
+                        //let { msg, code, user } = data;
+                        if (data == '') {
                             this.$message({
                                 message: msg,
                                 type: 'error'
                             });
                         } else {
-                            sessionStorage.setItem('user', JSON.stringify(user));
-                            this.$router.push({ path: '/home' });
+                            sessionStorage.setItem('user', JSON.stringify(data));
+                            this.$router.push({ path: '/p11' });
                         }
                     });
-                    //sessionStorage.setItem('user', JSON.stringify("{loginName:'admin',password:'12345'}"));
-                    this.$router.push({ path: '/p11' });
                 } else {
                     console.log('error submit!!');
                     return false;

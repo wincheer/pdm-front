@@ -86,7 +86,7 @@ export default {
             sysName: 'PDM - iData',
             collapsed: false,
             sysUserName: '',
-            sysUserAvatar: '',
+            sysUserAvatar: '../assets/avatar.jpg',
             newFiles:3,
             form: {
                 name: '',
@@ -138,9 +138,7 @@ export default {
         var user = sessionStorage.getItem('user');
         if (user) {
             user = JSON.parse(user);
-            this.sysUserName = loginName || '';
-            //this.sysUserAvatar = user.avatar || '';
-            //this.sysUserName = '第九骑士';
+            this.sysUserName = user.displayName;
             this.sysUserAvatar = 'https://raw.githubusercontent.com/taylorchen709/markdown-images/master/vueadmin/user.png';
         }
 
