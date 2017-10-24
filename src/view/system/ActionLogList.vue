@@ -1,17 +1,17 @@
 <template>
   <section>
-        <!-- 查询工具条 -->
-        <el-col :span="24" class="toolbar" style="padding-bottom: 0px;">
-			<el-form :inline="true" :model="queryLog">
-				<el-form-item>
-					<el-input v-model="queryLog.actor" placeholder="操作员"></el-input>
-				</el-form-item>
+      <!-- 查询工具条 -->
+      <el-col :span="24" class="toolbar" style="padding-bottom: 0px;">
+			<el-form :inline="true" :model="filter">
                 <el-form-item>
-					<el-input v-model="queryLog.action" placeholder="操作"></el-input>
-				</el-form-item>
-				<el-form-item>
-					<el-button type="primary" @click="queryLogs">查询</el-button>
-				</el-form-item>
+                    <el-input v-model="filter.actor" placeholder="操作员"></el-input>
+                </el-form-item>
+                <el-form-item>
+                    <el-input v-model="filter.action" placeholder="操作"></el-input>
+                </el-form-item>
+                <el-form-item>
+                    <el-button type="primary" @click="queryLogs">查询</el-button>
+                </el-form-item>
 			</el-form>
 		</el-col>
         <!--列表-->
@@ -36,15 +36,15 @@
 </template>
 
 <script>
-import { queryLogListPage } from '../../config/api';
+import { queryLogListPage } from "../../config/api";
 export default {
   data() {
     return {
-      queryLog: {
-        actor: '',
-        action: ''
+      filter: {
+        actor: "",
+        action: ""
       },
-      listLoading:false,
+      listLoading: false,
       logList: [],
       total: 0,
       page: 1,
@@ -60,7 +60,7 @@ export default {
       let param = {
         pageNo: this.page,
         pageSize: this.size,
-        queryLog: this.queryLog
+        filter: this.filter
       };
       this.listLoading = true;
       queryLogListPage(param).then(res => {
