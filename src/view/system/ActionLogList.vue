@@ -68,11 +68,11 @@ export default {
         this.logList = res.rows;
         this.listLoading = false;
       });
-    },
-    mounted() {
+    }  
+  },
+  mounted() {
       this.queryLogs();
     }
-  }
 };
 </script>
 

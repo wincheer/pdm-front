@@ -6,6 +6,7 @@ import FirstPage from '../view/document/FirstPage.vue'
 import SecondPage from '../view/system/SecondPage.vue'
 import ActionLogList from '../view/system/ActionLogList.vue'
 import EmployeeList from '../view/system/EmployeeList.vue'
+import TemplateList from '../view/system/TemplateList.vue'
 
 let routes = [
     {
@@ -34,9 +35,9 @@ let routes = [
         name: '系统配置',
         iconCls: 'fa fa-cog',
         children: [
-            { path: '/p23', component: Todo, name: '项目文档模板配置' },
+            { path: '/template', component: TemplateList, name: '项目文档模板配置' },
             { path: '/user', component: EmployeeList, name: '用户及权限管理' },
-            { path: '/p22', component: Todo, name: '项目管理' },
+            { path: '/foo', component: Todo, name: '项目管理' },
             { path: '/log', component: ActionLogList, name: '查看操作日志' }
         ]
     },

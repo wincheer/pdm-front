@@ -10,4 +10,8 @@ export const queryEmployeeListPage = params => { return axios.post(`${base}/user
 
 export const removeUser = params => { return axios.get(`${base}/delUser`, { params: params }); };
 
+export const editUser = params => { return axios.post(`${base}/editUser`, params).then(res => res.data); };
+
+export const queryTemplistList = () => { return axios.get(`${base}/templateList`); };
+
 //export const queryLogListPage = params => { return axios.get(`${base}/logPageList`, { params: params }); };
