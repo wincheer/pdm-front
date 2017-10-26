@@ -16,15 +16,15 @@
 		</el-col>
         <!--列表-->
 		<el-table :data="logList" highlight-current-row  v-loading="listLoading" style="width: 100%;">
-			<el-table-column prop="actor" label="操作员" width="120">
+			<el-table-column prop="actor" label="操作员" width="100">
 			</el-table-column>
-			<el-table-column prop="action" label="操作" width="120" >
+			<el-table-column prop="action" label="操作" width="100" >
 			</el-table-column>
-			<el-table-column prop="actionObject" label="操作对象" width="220" >
+			<el-table-column prop="actionObject" label="操作对象" width="100" >
 			</el-table-column>
-			<el-table-column prop="action_date" label="时间" width="200" >
+			<el-table-column prop="action_date" label="时间" width="100" >
 			</el-table-column>
-			<el-table-column prop="ip_address" label="IP 地址" min-width="200" >
+			<el-table-column prop="ip_address" label="IP 地址" min-width="100" >
 			</el-table-column>
 		</el-table>
         <!--分页工具条-->
