@@ -36,7 +36,7 @@
             <el-form-item label="项目描述：" prop="projectDesc">
               <el-input v-model="projectForm.projectDesc" style="width:90%"></el-input>
             </el-form-item>
-            <el-form-item label="项目模板：" prop="templateId">
+            <el-form-item label="参考模板：" prop="templateId">
               <el-select v-model="projectForm.templateId" placeholder="请选择模板...">
                 <el-option v-for="item in templateList" :key="item.templateId" :label="item.templateName" :value="item.templateId" />
               </el-select>
