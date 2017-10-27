@@ -7,6 +7,7 @@ import SecondPage from '../view/system/SecondPage.vue'
 import ActionLogList from '../view/system/ActionLogList.vue'
 import EmployeeList from '../view/system/EmployeeList.vue'
 import TemplateList from '../view/system/TemplateList.vue'
+import ProjectList from '../view/system/ProjectList.vue'
 
 let routes = [
     {
@@ -37,7 +38,7 @@ let routes = [
         children: [
             { path: '/template', component: TemplateList, name: '项目目录模板配置' },
             { path: '/user', component: EmployeeList, name: '用户及权限管理' },
-            { path: '/foo', component: Todo, name: '项目管理' },
+            { path: '/project', component: ProjectList, name: '项目配置' },
             { path: '/log', component: ActionLogList, name: '查看操作日志' }
         ]
     },

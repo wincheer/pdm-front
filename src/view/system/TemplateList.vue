@@ -4,7 +4,7 @@
         <el-col :span='24' class="toolbar" style="padding-bottom: 0px;">
             <el-form :inline="true" :model="filter">
                 <el-form-item>
-                    <el-select v-model="filter.templateId" @change="queryTemplateFolders">
+                    <el-select v-model="filter.templateId" @change="queryTemplateFolders" placeholder="请选择模板...">
                         <el-option v-for="item in templateList" :key="item.templateId" :label="item.templateName" :value="item.templateId" />
                     </el-select>
                 </el-form-item>
@@ -60,7 +60,7 @@ export default {
     return {
       //工具条数据
       filter: {
-        templateId: 0
+        templateId: null
       },
       listLoading: true,
       templateList: [],
@@ -92,7 +92,7 @@ export default {
       queryTemplateList().then(res => {
         this.templateList = res.data;
         this.listLoading = false;
-        this.filter.templateId = this.templateList[0];
+        //this.filter.templateId = this.templateList[0];
       });
     },
     queryTemplateFolders: function() {
