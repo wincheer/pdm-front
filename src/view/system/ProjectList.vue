@@ -6,21 +6,21 @@
         </el-col>
         <!--项目列表-->
         <el-col>
-            <el-card :body-style="{ padding: '0px'}" :style="{ width: '140px', float:'left',margin:'15px'}"  v-for="(o, index) in projectList" :key="o">
+            <el-card v-for="(o, index) in projectList" :key="index" :body-style="{ padding: '0px'}" :style="{ width: '140px', float:'left',margin:'15px'}">
                 <img src="../../assets/folder.jpg" class="image">
                 <div style="padding: 5px;">
-                    <el-tooltip :content="o.desc" effect="light">
-                        <span>{{o.pname}}</span>
+                    <el-tooltip :content="o.projectDesc" effect="light">
+                        <span>{{o.projectName}}</span>
                     </el-tooltip>
                     <div class="bottom clearfix">
-                        <time class="time">{{o.cdate}}</time>
-                        <el-dropdown>
+                        <time class="time">{{o.createDate}}</time>
+                        <el-dropdown trigger="click">
                             <el-button type="info" size="mini">
                                 操作<i class="el-icon-caret-bottom el-icon--right"></i>
                             </el-button>
                             <el-dropdown-menu slot="dropdown">
-                                <el-dropdown-item>编辑目录</el-dropdown-item>
-                                <el-dropdown-item>分配项目成员</el-dropdown-item>
+                                <el-dropdown-item :pid="o.projectId" @click.native="myClick0">编辑目录</el-dropdown-item>
+                                <el-dropdown-item @click.native="myClick(o)">分配项目成员</el-dropdown-item>
                             </el-dropdown-menu>
                         </el-dropdown>
                     </div>
@@ -51,36 +51,41 @@
 </template>
 
 <script>
-import { queryProjectList,insertProject,queryTemplateList } from "../../config/api";
+import {
+  queryProjectPageList,
+  insertProject,
+  queryTemplateList
+} from "../../config/api";
 export default {
   data() {
     return {
       loading: false,
       //新建项目
-      projectFormVisible:false,
+      projectFormVisible: false,
       templateList: [],
-      projectForm:{
-          projectName:'',
-          projectDesc:'',
-          templateId:null,
-          createDate:null
+      projectForm: {
+        projectName: "",
+        projectDesc: "",
+        templateId: null,
+        createDate: null
       },
       projectFormRules: {
-        projectName: [{ required: true, message: "请输入目录名", trigger: "blur" }],
+        projectName: [{ required: true, message: "请输入目录名", trigger: "blur" }]
         //templateId: [{ required: true, message: "请选择项目模板", trigger: "change" }]
       },
       //项目列表
-      projectList: [
-        { pname: "项目1", cdate: "2017-01-12", desc: "项目不是信息，项目标书信息" },
-        { pname: "小项目", cdate: "2016-12-30", desc: "项目描述" },
-        { pname: "大项目很大", cdate: "2017-10-05", desc: "项目全名" }
-      ]
+      projectList: []
     };
   },
   methods: {
     queryProjects: function() {
-      queryProjectList().then(res => {
-        this.projectList = res.data;
+      let param = {
+        pageNo: 1,
+        pageSize: 1000000,
+        filter: {}
+      };
+      queryProjectPageList(param).then(res => {
+        this.projectList = res;
         this.loading = false;
       });
     },
@@ -102,15 +107,21 @@ export default {
             });
             this.loading = false;
             this.projectFormVisible = false;
-            this.queryTemplates();
+            this.queryProjects();
           });
         }
       });
     },
-    
+    myClick0(event) {
+      this.$message("自定义点击：从event中获取当前组件的属性值(pid)项目ID = "+event.currentTarget.attributes.pid.value);
+    },
+    myClick(row) {
+      this.$message("自定义点击：直接传递参数 projectId = "+row.projectId);
+    }
   },
   mounted() {
-      this.queryTemplates();
+    this.queryTemplates();
+    this.queryProjects();
   }
 };
 </script>

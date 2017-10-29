@@ -15,7 +15,7 @@ export const queryTemplateFolderList = params => { return axios.get(`${base}/tem
 export const insertTemplateFolder = params => { return axios.post(`${base}/insertTemplateFolder`, params).then(res => res.data); };
 export const removeTemplateFolder = params => { return axios.get(`${base}/removeTemplateFolder`, { params: params }); };
 
-export const queryProjectList = () => { return axios.get(`${base}/projectList`); };
+export const queryProjectPageList = params => { return axios.post(`${base}/projectPageList`, params).then(res => res.data); };
 export const insertProject = params => { return axios.post(`${base}/insertProject`, params).then(res => res.data); };
 
 
