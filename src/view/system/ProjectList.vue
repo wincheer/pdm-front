@@ -19,8 +19,8 @@
                                 操作<i class="el-icon-caret-bottom el-icon--right"></i>
                             </el-button>
                             <el-dropdown-menu slot="dropdown">
-                                <el-dropdown-item :pid="o.projectId" @click.native="myClick0">编辑目录</el-dropdown-item>
-                                <el-dropdown-item @click.native="myClick(o)">分配项目成员</el-dropdown-item>
+                                <el-dropdown-item @click.native="openProjectFolders(o)">编辑目录</el-dropdown-item>
+                                <el-dropdown-item @click.native="openProjectEmployees(o)">分配项目成员</el-dropdown-item>
                             </el-dropdown-menu>
                         </el-dropdown>
                     </div>
@@ -47,6 +47,77 @@
             <el-button type="primary" @click.native="saveProject" :loading="loading">提交</el-button>
           </div>
         </el-dialog>
+        <!-- 编辑目录 -->
+        <el-dialog title="编辑目录" v-model="projectFoldersVisible" :close-on-click-modal="false" size="tiny">
+          <el-col>
+              <el-form>
+                <el-form-item>
+                  <el-tree 
+                      :data="projectFoldList" 
+                      :props="defaultProps" 
+                      node-key="id" 
+                      ref="tree" 
+                      default-expand-all 
+                      :expand-on-click-node="false"
+                      :render-content="renderContent">
+                  </el-tree>
+                </el-form-item>
+              </el-form>
+          </el-col>
+          <div slot="footer" class="dialog-footer">
+              <el-button @click.native="projectFoldersVisible = false">关闭</el-button>
+          </div>
+        </el-dialog>
+        <!--添加 Tree 节点的界面-->
+        <el-dialog :title="addFormTitle" v-model="addFormVisible" :close-on-click-modal="false" size="tiny">
+          <el-form :model="addForm" label-width="100px" :rules="addFormRules" ref="addForm">
+            <el-form-item label="目录名：" prop="templateFolderName">
+              <el-input v-model="addForm.folderName" style="width:90%"></el-input>
+            </el-form-item>
+          </el-form>
+          <div slot="footer" class="dialog-footer">
+            <el-button @click.native="addFormVisible = false">取消</el-button>
+            <el-button type="primary" @click.native="saveFolder" :loading="loading">提交</el-button>
+          </div>
+        </el-dialog>
+        <!-- 分配项目成员 -->
+        <el-dialog title="分配项目组成员" v-model="assignMemberVisible" :close-on-click-modal="false" size="tiny">
+          <el-col :span="24" class="toolbar" style="padding-bottom: 0px;">
+            {{selectedProject.projectDesc}}
+            <el-button type="primary" @click="handleAdd" icon="plus"></el-button>
+          </el-col>
+          <el-table :data="projectEmployeeList" highlight-current-row  v-loading="loading" border style="width: 100%;">
+            <el-table-column prop="employeeId" label="用户名" width="120" :formatter="formatEmployee"></el-table-column>
+            <el-table-column prop="roleId" label="角色" width="180" :formatter="formatRole"></el-table-column>
+            <el-table-column label="操作">
+              <template slot-scope="scope">
+                <el-button size="small"  @click="handleEdit(scope.$index, scope.row)" icon="edit"></el-button>
+                <el-button type="danger" size="small" @click="handleDel(scope.$index, scope.row)" icon="delete"></el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+        </el-dialog>
+        <!--编辑项目组成员-->
+        <el-dialog :title="editFormTitle" v-model="editFormVisible" :close-on-click-modal="false" size="tiny">
+          <el-form :model="editForm" label-width="100px" :rules="editFormRules" ref="editForm">
+            <el-form-item label="用户：" prop="employeeId">
+              <el-select v-model="editForm.employeeId" placeholder="请选择">
+                  <el-option v-for="item in employeeList" :key="item.employeeId" :label="item.displayName" :value="item.employeeId">
+                  </el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="角色：" prop="roleId">
+              <el-select v-model="editForm.roleId" placeholder="请选择">
+                  <el-option v-for="item in roleList" :key="item.roleId" :label="item.roleName" :value="item.roleId">
+                  </el-option>
+              </el-select>
+            </el-form-item>
+          </el-form>
+          <div slot="footer" class="dialog-footer">
+            <el-button @click.native="editFormVisible = false">取消</el-button>
+            <el-button type="primary" @click.native="saveSubmit" :loading="loading">提交</el-button>
+          </div>
+        </el-dialog>
     </section>  
 </template>
 
@@ -54,7 +125,14 @@
 import {
   queryProjectPageList,
   insertProject,
-  queryTemplateList
+  queryTemplateList,
+  queryFolderList,
+  insertFolder,
+  removeFolder,
+  queryProjectEmployeeList,
+  queryEmployeeList,
+  editProjectEmployee,
+  removeProjectEmployee
 } from "../../config/api";
 export default {
   data() {
@@ -74,7 +152,60 @@ export default {
         //templateId: [{ required: true, message: "请选择项目模板", trigger: "change" }]
       },
       //项目列表
-      projectList: []
+      projectList: [],
+      selectedProject: {},
+      projectFoldList: [],
+      projectFoldersVisible: false,
+      defaultProps: {
+        children: "children",
+        label: "label"
+      },
+      //新增目录
+      addFormTitle: "",
+      addFormVisible: false,
+      addForm: {
+        projectId: -1,
+        folderName: "",
+        dolderDesc: "",
+        parentFolderId: -1
+      },
+      addFormRules: {
+        folderName: [{ required: true, message: "请输入目录名", trigger: "blur" }]
+      },
+      //分配项目组成员
+      assignMemberVisible:false,
+      projectEmployeeList:[],
+      //更新项目组成员
+      roleList: [
+        {
+          roleId: 1,
+          roleName: "系统管理员"
+        },
+        {
+          roleId: 2,
+          roleName: "项目管理员"
+        },
+        {
+          roleId: 3,
+          roleName: "项目成员"
+        },
+        {
+          roleId: 4,
+          roleName: "普通用户"
+        }
+      ],
+      editFormTitle:'',
+      employeeList:[],
+      editFormVisible:false,
+      editForm:{
+        projectId:null,
+        employeeId:null,
+        roleId:null
+      },
+      editFormRules: {
+        //employeeId: [{ required: true, message: "请选择用户", trigger: "blur" }],
+        //roleId: [{ required: true, message: "请选择用户的角色", trigger: "blur" }]
+      },
     };
   },
   methods: {
@@ -95,6 +226,12 @@ export default {
         this.loading = false;
       });
     },
+    queryEmployees: function() {
+      queryEmployeeList().then(res => {
+        this.employeeList = res.data;
+        this.loading = false;
+      });
+    },
     saveProject: function() {
       this.$refs.projectForm.validate(valid => {
         if (valid) {
@@ -112,12 +249,202 @@ export default {
         }
       });
     },
-    myClick0(event) {
-      this.$message("自定义点击：从event中获取当前组件的属性值(pid)项目ID = "+event.currentTarget.attributes.pid.value);
+    queryProjectFolders: function() {
+      let para = { projectId: this.selectedProject.projectId };
+      queryFolderList(para).then(res => {
+        this.projectFoldList = res.data;
+      });
     },
-    myClick(row) {
-      this.$message("自定义点击：直接传递参数 projectId = "+row.projectId);
-    }
+    queryProjectEmployees: function() {
+      let para = { projectId: this.selectedProject.projectId };
+      queryProjectEmployeeList(para).then(res => {
+        this.projectEmployeeList = res.data;
+      });
+    },
+    openProjectFolders(row) {
+      this.selectedProject = row;
+      this.queryProjectFolders();
+      this.projectFoldersVisible = true;
+    },
+    openProjectEmployees(row) {
+      this.selectedProject = row;
+      this.queryProjectEmployees();
+      this.queryEmployees();
+      this.assignMemberVisible = true;
+    },
+    openAddFolder( data, location) {
+      this.addFormVisible = true;
+      this.addFormTitle = location == "son" ? data.label+"新增子目录" : data.label+"新增同级目录";
+      //填充目录树节点数据
+      this.addForm = {
+        projectId: data.ownerId,
+        folderName: "",
+        parentFolderId: location == "son" ? data.id : data.parentId
+      };
+    },
+    saveFolder() {
+      this.$refs.addForm.validate(valid => {
+        if (valid) {
+          this.loading = true;
+          let para = Object.assign({}, this.addForm);
+          insertFolder(para).then(res => {
+            this.loading = false;
+            this.$message({
+              message: "提交成功",
+              type: "success"
+            });
+            this.addFormVisible = false;
+            this.queryProjectFolders();
+          });
+        }
+      });
+    },
+    removeFolder(data) {
+      this.$confirm("确认删除 【" + data.label + "】 目录吗?", "提示", {
+        type: "warning"
+      }).then(() => {
+        this.loading = true;
+        let para = { folderId: data.id };
+        removeFolder(para).then(res => {
+          this.loading = false;
+          this.$message({
+            message: "删除成功",
+            type: "success"
+          });
+          this.queryProjectFolders();
+        });
+      });
+    },
+    renderContent(h, { node, data, store }) {
+      if (data.children) {
+        return (
+          <span>
+            <span>
+              <span>{node.label}</span>
+            </span>
+            <span style="float: right; margin-right: 20px">
+              <el-button
+                size="mini"
+                on-click={() => this.openAddForm(data, "brother")}
+                icon="plus"
+              >
+                添加兄弟
+              </el-button>
+              <el-button
+                size="mini"
+                on-click={() => this.openAddForm(data, "son")}
+                icon="plus"
+              >
+                添加儿子
+              </el-button>
+            </span>
+          </span>
+        );
+      } else {
+        return (
+          <span>
+            <span>
+              <span>{node.label}</span>
+            </span>
+            <span style="float: right; margin-right: 20px">
+              <el-button
+                size="mini"
+                on-click={() => this.openAddFolder( data, "brother")}
+                icon="plus"
+              >
+                添加兄弟
+              </el-button>
+              <el-button
+                size="mini"
+                on-click={() => this.openAddFolder( data, "son")}
+                icon="plus"
+              >
+                添加儿子
+              </el-button>
+              <el-button
+                size="mini"
+                type="danger"
+                on-click={() => this.removeFolder(data)}
+                icon="delete"
+              >
+                删除
+              </el-button>
+            </span>
+          </span>
+        );
+      }
+    },
+    handleAdd(){
+      this.editFormVisible = true;
+      this.editFormTitle = "新增项目成员";
+      this.editForm = {
+        employeeId: null,
+        projectId: this.selectedProject.projectId,
+        roleId: null
+      };
+    },
+    saveSubmit(){
+      this.$refs.editForm.validate(valid => {
+        if (valid) {
+          this.loading = true;
+          let para = Object.assign({}, this.editForm);
+          editProjectEmployee(para).then(res => {
+            this.loading = false;
+            this.$message({
+              message: "提交成功",
+              type: "success"
+            });
+            this.editFormVisible = false;
+            this.queryProjectEmployees();
+          });
+        }
+      });
+    },
+    handleEdit(index, row){
+      this.editFormVisible = true;
+      this.editFormTitle = "编辑项目成员";
+      this.editForm = Object.assign({}, row);
+      //editForm.projectId =  this.selectedProject.projectId;
+    },
+    handleDel(index, row){
+      this.$confirm("确认删除该记录吗?", "提示", {
+        type: "warning"
+      })
+        .then(() => {
+          this.listLoading = true;
+          let para = { employeeProjectId: row.employeeProjectId };
+          removeProjectEmployee(para).then(res => {
+            this.listLoading = false;
+            this.$message({
+              message: "删除成功",
+              type: "success"
+            });
+            this.queryProjectEmployees();
+          });
+        })
+        .catch(() => {});
+    },
+    formatRole: function(row, column) {
+      var role_name;
+      for (var index in this.roleList) {
+        if (this.roleList[index].roleId == row.roleId) {
+          role_name = this.roleList[index].roleName;
+          break;
+        }
+      }
+      return role_name;
+    },
+    formatEmployee: function(row, column) {
+      var displayName;
+      for (var index in this.employeeList) {
+        if (this.employeeList[index].employeeId == row.employeeId) {
+          displayName = this.employeeList[index].displayName;
+          break;
+        }
+      }
+      return displayName;
+    },
+
   },
   mounted() {
     this.queryTemplates();

@@ -31,7 +31,7 @@
             </el-tree>
         </el-col>
         <!--添加 Tree 节点的界面-->
-        <el-dialog :title="addFormTitle" v-model="addFormVisible" :close-on-click-modal="false" size="tiny">
+        <el-dialog :title="addFormTitle" v-model="addFormVisible" :close-on-click-modal="false" >
           <el-form :model="addForm" label-width="100px" :rules="addFormRules" ref="addForm">
             <el-form-item label="目录名：" prop="templateFolderName">
               <el-input v-model="addForm.templateFolderName" style="width:90%"></el-input>
@@ -108,7 +108,7 @@ export default {
       this.addFormTitle = location == "son" ? "新增子目录" : "新增同级目录";
       //填充目录树节点数据
       this.addForm = {
-        templateId: data.templateId,
+        templateId: data.ownerId,
         templateFolderName: "",
         templateFolderDesc: "",
         parentTemplateFolderId: location == "son" ? data.id : data.parentId
