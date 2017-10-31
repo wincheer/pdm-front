@@ -27,4 +27,6 @@ export const queryProjectEmployeeList = params => { return axios.get(`${base}/pr
 export const editProjectEmployee = params => { return axios.post(`${base}/editEmployeeProject`, params).then(res => res.data); };
 export const removeProjectEmployee = params => { return axios.get(`${base}/removeProjectEmployee`, { params: params }); };
 
+export const queryMyProjectList = params => { return axios.get(`${base}/myProjectList`, { params: params }); };
+
 //export const queryLogListPage = params => { return axios.get(`${base}/logPageList`, { params: params }); };

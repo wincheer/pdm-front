@@ -2,12 +2,16 @@ import Login from '../view/Login.vue'
 import Todo from '../view/Todo.vue'
 import NotFound from '../view/PageNotFound.vue'
 import Home from '../view/Home.vue'
+
 import FirstPage from '../view/document/FirstPage.vue'
 import SecondPage from '../view/system/SecondPage.vue'
 import ActionLogList from '../view/system/ActionLogList.vue'
 import EmployeeList from '../view/system/EmployeeList.vue'
 import TemplateList from '../view/system/TemplateList.vue'
 import ProjectList from '../view/system/ProjectList.vue'
+
+import Public from '../view/document/Public.vue'
+import Private from '../view/document/Private.vue'
 
 let routes = [
     {
@@ -26,8 +30,8 @@ let routes = [
         name: '文档操作',
         iconCls: 'fa fa-file',
         children: [
-            { path: '/p11', component: FirstPage, name: '我的私人文件' },
-            { path: '/p12', component: SecondPage, name: '项目文件' }
+            { path: '/private', component: Private, name: '我的私人文档' },
+            { path: '/public', component: Public, name: '项目文档' }
         ]
     },
     {

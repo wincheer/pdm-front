@@ -21,7 +21,7 @@
         <el-table :data="employeeList" highlight-current-row  v-loading="listLoading" border style="width: 100%;">
           <el-table-column prop="displayName" label="用户名" width="280"></el-table-column>
 			    <el-table-column prop="loginName" label="登录账号" width="280" ></el-table-column>
-          <el-table-column prop="role" label="角色" width="280" :formatter="formatRole"></el-table-column>
+          <!-- <el-table-column prop="role" label="角色" width="280" :formatter="formatRole"></el-table-column> -->
           <el-table-column label="操作">
             <template slot-scope="scope">
               <el-button size="small"  @click="handleEdit(scope.$index, scope.row)" icon="edit"></el-button>
@@ -46,12 +46,12 @@
 				<el-form-item label="登录密码：" prop="loginPassword">
 					<el-input v-model="editForm.loginPassword" style="width:90%"></el-input>
 				</el-form-item>
-				<el-form-item label="角色：" prop="role">
+				<!-- <el-form-item label="角色：" prop="role">
 					<el-select v-model="editForm.role" placeholder="请选择">
                         <el-option v-for="item in roleList" :key="item.roleId" :label="item.roleName" :value="item.roleId">
                         </el-option>
                     </el-select>
-				</el-form-item>
+				</el-form-item> -->
 			</el-form>
 			<div slot="footer" class="dialog-footer">
 				<el-button @click.native="editFormVisible = false">取消</el-button>

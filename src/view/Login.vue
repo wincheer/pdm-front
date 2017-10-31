@@ -54,7 +54,7 @@ export default {
                             });
                         } else {
                             sessionStorage.setItem('user', JSON.stringify(data));
-                            this.$router.push({ path: '/p11' });
+                            this.$router.push({ path: '/public' });
                         }
                     });
                 } else {
