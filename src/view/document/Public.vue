@@ -13,11 +13,14 @@
           </el-form-item>
           <el-form-item>
               <el-upload 
+                  ref="upload"
                   action="http://localhost:8080/upload" 
+                  :show-file-list="false"
+                  :auto-upload="false"
                   :data="uploadParams" 
                   :on-success="handleSuccessUpload" 
-                  :before-upload="beforeUpload">
-                <el-button icon="upload2" type="primary">上传</el-button>
+                  :on-change="beforeUpload">
+                <el-button icon="upload2" type="primary" slot="trigger">上传</el-button>
               </el-upload>
           </el-form-item>
           <el-form-item>
@@ -39,20 +42,20 @@
 
 <script>
 import { queryMyProjectList, queryFolderList } from "../../config/api";
-import SparkMD5 from 'spark-md5'
+import SparkMD5 from "spark-md5";
 
 export default {
   data() {
     return {
       loginUser: "",
       loading: false,
-      uploadFormVisible: false,
       myProjects: [],
       selectedProjectId: "",
       folderTree: [],
       folderList: [],
       selectedFolderId: [],
-      uploadParams:{}
+      uploadParams: {},
+      fileMd5: ""
     };
   },
   watch: {
@@ -62,7 +65,15 @@ export default {
       queryFolderList(para).then(res => {
         this.folderTree = res.data;
         //b--
-        var p_root = [{id:0,parentId:null,label:'根目录',ownerId:this.selectedProjectId,children:this.folderTree}];
+        var p_root = [
+          {
+            id: 0,
+            parentId: null,
+            label: "根目录",
+            ownerId: this.selectedProjectId,
+            children: this.folderTree
+          }
+        ];
         this.folderTree = p_root;
         //e--
         this.selectedFolderId = [0];
@@ -79,6 +90,11 @@ export default {
           this.findChildren(node, _folderId);
         }
       }
+    },
+    fileMd5: function(val) {
+      this.$message(val);
+      this.uploadParams = { fileMd5: val };
+      this.$refs.upload.submit();
     }
   },
   methods: {
@@ -103,21 +119,46 @@ export default {
     intoFolder: function(folder) {
       this.selectedFolderId.push(folder.id);
     },
-    beforeUpload:function(file){
-      //获取MD5
-      var spark = new SparkMD5();
-      spark.appendBinary(file);
-      var md5 = spark.end();
-      this.$message("MD5 = " + md5)
-      //设置上传参数
-      this.uploadParams = {
-        projectId:this.selectedProjectId,
-        uploader:'wincheer'
+    beforeUpload: function(fileObj, fileList) {
+      var _this = this;
+      var blobSlice =
+          File.prototype.slice ||
+          File.prototype.mozSlice ||
+          File.prototype.webkitSlice,
+        file = fileObj.raw,
+        chunkSize = 100 * 1024 * 1024, // Read in chunks of 100MB
+        chunks = Math.ceil(file.size / chunkSize),
+        currentChunk = 0,
+        spark = new SparkMD5.ArrayBuffer(),
+        fileReader = new FileReader();
+
+      fileReader.onload = function(e) {
+        spark.append(e.target.result); // Append array buffer
+        currentChunk++;
+
+        if (currentChunk < chunks) {
+          loadNext();
+        } else {
+          _this.fileMd5 = spark.end();
+        }
+      };
+
+      fileReader.onerror = function() {
+        console.warn("oops, something went wrong.");
+      };
+
+      function loadNext() {
+        var start = currentChunk * chunkSize,
+          end = start + chunkSize >= file.size ? file.size : start + chunkSize;
+        fileReader.readAsArrayBuffer(blobSlice.call(file, start, end));
       }
+
+      loadNext();
     },
-    handleSuccessUpload:function(res, file){
+    handleSuccessUpload: function(res, file) {
       //刷新当前目录
-    }
+    },
+    getFildMd5: function(file) {}
   },
   mounted() {
     var user = JSON.parse(sessionStorage.getItem("user"));
