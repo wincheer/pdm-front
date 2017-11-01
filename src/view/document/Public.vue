@@ -19,7 +19,7 @@
                   :auto-upload="false"
                   :data="uploadParams" 
                   :on-success="handleSuccessUpload" 
-                  :on-change="beforeUpload">
+                  :on-change="foo">
                 <el-button icon="upload2" type="primary" slot="trigger">上传</el-button>
               </el-upload>
           </el-form-item>
@@ -92,9 +92,9 @@ export default {
       }
     },
     fileMd5: function(val) {
-      this.$message(val);
-      this.uploadParams = { fileMd5: val };
-      this.$refs.upload.submit();
+      // this.$message(val);
+      // this.uploadParams = { fileMd5: val };
+      // this.$refs.upload.submit();
     }
   },
   methods: {
@@ -154,6 +154,24 @@ export default {
       }
 
       loadNext();
+    },
+    foo: function(fileObj, fileList) {
+      var _this = this;
+      var fileReader = new FileReader();
+      var spark = new SparkMD5.ArrayBuffer();
+
+      fileReader.readAsArrayBuffer(fileObj.raw);
+      fileReader.onload = function(e) {
+        spark.append(e.target.result);
+        _this.fileMd5 = spark.end();
+
+        //this.$message(val);
+        _this.uploadParams = { fileMd5: '1234567890' };
+        _this.$refs.upload.submit();
+
+      };
+
+      
     },
     handleSuccessUpload: function(res, file) {
       //刷新当前目录
