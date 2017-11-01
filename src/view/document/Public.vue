@@ -12,7 +12,13 @@
               <el-cascader v-model="selectedFolderId" :props="{value:'id'}" :options="folderTree" change-on-select></el-cascader>
           </el-form-item>
           <el-form-item>
-              <el-button type="primary" icon="upload2" @click.native="uploadFormVisible = true">上传</el-button>
+              <el-upload 
+                  action="http://localhost:8080/upload" 
+                  :data="uploadParams" 
+                  :on-success="handleSuccessUpload" 
+                  :before-upload="beforeUpload">
+                <el-button icon="upload2" type="primary">上传</el-button>
+              </el-upload>
           </el-form-item>
           <el-form-item>
               <el-button type="primary" icon="view">预览</el-button>
@@ -24,7 +30,7 @@
             <el-card v-for="(o, index) in folderList" :key="index" :body-style="{ padding: '0px'}" :style="{ width: '140px', float:'left',margin:'15px'}">
                 <img src="../../assets/folder.jpg" class="image" @dblclick="intoFolder(o)"/>
                 <div style="padding: 5px;" >
-                    <span>{{o.label +'|' +o.id}}</span>
+                    <span>{{o.label}}</span>
                 </div>
             </el-card>
         </el-col>
@@ -33,6 +39,8 @@
 
 <script>
 import { queryMyProjectList, queryFolderList } from "../../config/api";
+import SparkMD5 from 'spark-md5'
+
 export default {
   data() {
     return {
@@ -43,7 +51,8 @@ export default {
       selectedProjectId: "",
       folderTree: [],
       folderList: [],
-      selectedFolderId: []
+      selectedFolderId: [],
+      uploadParams:{}
     };
   },
   watch: {
@@ -52,6 +61,10 @@ export default {
       let para = { projectId: this.selectedProjectId };
       queryFolderList(para).then(res => {
         this.folderTree = res.data;
+        //b--
+        var p_root = [{id:0,parentId:null,label:'根目录',ownerId:this.selectedProjectId,children:this.folderTree}];
+        this.folderTree = p_root;
+        //e--
         this.selectedFolderId = [0];
       });
     },
@@ -69,13 +82,6 @@ export default {
     }
   },
   methods: {
-    findFather(folder) {
-      this.selectedFolderId.unshift(folder.parentId);
-      if (folder.parentId != 0) {
-        var _folder = this.findNode(folder.parentId, this.folderTree);
-        this.findFather(_folder);
-      }
-    },
     findChildren: function(node, folder_id) {
       if (node.children) {
         for (var i = 0; i < node.children.length; i++) {
@@ -88,16 +94,6 @@ export default {
         }
       }
     },
-    findNode(folder_id, tree) {
-      for (var i = 0; i < tree.length; i++) {
-        var node = tree[i];
-        if ((node.id = folder_id)) {
-          return node;
-        } else {
-          this.findNode(folder_id, node);
-        }
-      }
-    },
     queryMyProjects: function() {
       let param = { employeeId: this.loginUser.employeeId };
       queryMyProjectList(param).then(res => {
@@ -105,11 +101,22 @@ export default {
       });
     },
     intoFolder: function(folder) {
-      //this.selectedFolderId = [];
-      //this.selectedFolderId.unshift(folder.id);
       this.selectedFolderId.push(folder.id);
-      //this.findFather(folder);
-      //this.selectedFolderId = [4,6];
+    },
+    beforeUpload:function(file){
+      //获取MD5
+      var spark = new SparkMD5();
+      spark.appendBinary(file);
+      var md5 = spark.end();
+      this.$message("MD5 = " + md5)
+      //设置上传参数
+      this.uploadParams = {
+        projectId:this.selectedProjectId,
+        uploader:'wincheer'
+      }
+    },
+    handleSuccessUpload:function(res, file){
+      //刷新当前目录
     }
   },
   mounted() {
