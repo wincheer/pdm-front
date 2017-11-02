@@ -17,9 +17,10 @@
                   action="http://localhost:8080/upload" 
                   :show-file-list="false"
                   :auto-upload="false"
-                  :data="uploadParams" 
+                  :data="{fileMd5:this.fileMd5}" 
                   :on-success="handleSuccessUpload" 
-                  :on-change="foo">
+                  :on-change="foo"
+                  :before-upload="bar">
                 <el-button icon="upload2" type="primary" slot="trigger">上传</el-button>
               </el-upload>
           </el-form-item>
@@ -164,14 +165,12 @@ export default {
       fileReader.onload = function(e) {
         spark.append(e.target.result);
         _this.fileMd5 = spark.end();
-
-        //this.$message(val);
-        _this.uploadParams = { fileMd5: '1234567890' };
         _this.$refs.upload.submit();
-
       };
-
-      
+    },
+    bar:function(file){
+      this.$message(this.fileMd5);
+      this.uploadParams = { fileMd5: this.fileMd5 };
     },
     handleSuccessUpload: function(res, file) {
       //刷新当前目录
