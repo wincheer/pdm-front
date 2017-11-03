@@ -12,6 +12,7 @@ import ProjectList from '../view/system/ProjectList.vue'
 
 import Public from '../view/document/Public.vue'
 import Private from '../view/document/Private.vue'
+import Zero from '../view/document/Zero.vue'
 
 let routes = [
     {
@@ -28,10 +29,11 @@ let routes = [
         path: '/',
         component: Home,
         name: '文档操作',
-        iconCls: 'fa fa-file',
+        iconCls: 'fa fa-folder-o',
         children: [
             { path: '/private', component: Private, name: '我的私人文档' },
-            { path: '/public', component: Public, name: '项目文档' }
+            { path: '/public', component: Public, name: '项目文档' },
+            { path: '/zero', component: Zero, name: '测试多文件上传' }
         ]
     },
     {
