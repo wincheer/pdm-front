@@ -12,17 +12,7 @@
               <el-cascader v-model="selectedFolderId" :props="{value:'id'}" :options="folderTree" change-on-select></el-cascader>
           </el-form-item>
           <el-form-item>
-              <el-upload 
-                  ref="upload"
-                  action="http://localhost:8080/upload" 
-                  :show-file-list="false"
-                  :auto-upload="false"
-                  :data="{fileMd5:this.fileMd5}" 
-                  :on-success="handleSuccessUpload" 
-                  :on-change="foo"
-                  :before-upload="bar">
-                <el-button icon="upload2" type="primary" slot="trigger">上传</el-button>
-              </el-upload>
+              <el-button icon="upload2" type="primary" @click.native="uploadFormVisible = true">上传</el-button>
           </el-form-item>
           <el-form-item>
               <el-button type="primary" icon="view">预览</el-button>
@@ -30,14 +20,29 @@
 			  </el-form>
       </el-col>
       <!--项目目录列表-->
-        <el-col>
-            <el-card v-for="(o, index) in folderList" :key="index" :body-style="{ padding: '0px'}" :style="{ width: '140px', float:'left',margin:'15px'}">
-                <img src="../../assets/folder.jpg" class="image" @dblclick="intoFolder(o)"/>
-                <div style="padding: 5px;" >
-                    <span>{{o.label}}</span>
-                </div>
-            </el-card>
-        </el-col>
+      <el-col>
+          <el-card v-for="(o, index) in folderList" :key="index" :body-style="{ padding: '0px'}" :style="{ width: '140px', float:'left',margin:'15px'}">
+              <img src="../../assets/folder.jpg" class="image" @dblclick="intoFolder(o)"/>
+              <div style="padding: 5px;" >
+                  <span>{{o.label}}</span>
+              </div>
+          </el-card>
+      </el-col>
+      <!--文件上传对话框-->
+      <el-dialog title="上传文件" v-model="uploadFormVisible" :close-on-click-modal="false" size="tiny">
+        <el-upload
+            ref="upload"
+            action="http://localhost:8080/upload"
+            :on-change="onChange"
+            :before-upload="beforeUpload"
+            :auto-upload="false"
+            :multiple="true"
+            :data="uploadParams">
+            <el-button slot="trigger" type="primary">选取文件</el-button>
+            <el-button style="margin-left: 10px;" type="success" @click="submitUpload">上传到服务器</el-button>
+            <div slot="tip" class="el-upload__tip">单个文件最大不得超过100M。</div>
+        </el-upload>
+      </el-dialog>
   </section>
 </template>
 
@@ -48,21 +53,28 @@ import SparkMD5 from "spark-md5";
 export default {
   data() {
     return {
-      loginUser: "",
+      loginUser: {},
       loading: false,
       myProjects: [],
       selectedProjectId: "",
       folderTree: [],
       folderList: [],
       selectedFolderId: [],
-      uploadParams: {},
-      fileMd5: ""
+      uploadParams: {
+        docName:'',
+        docMd5:'',
+        projectId:'',
+        folderId:'',
+        employeeId:''
+      },
+      uploadFormVisible: false
     };
   },
   watch: {
     selectedProjectId: function(val) {
       //构建项目目录树
       let para = { projectId: this.selectedProjectId };
+      this.uploadParams.projectId = this.selectedProjectId;
       queryFolderList(para).then(res => {
         this.folderTree = res.data;
         //b--
@@ -83,6 +95,7 @@ export default {
     selectedFolderId: function(val) {
       this.folderList = [];
       var _folderId = this.selectedFolderId[this.selectedFolderId.length - 1];
+      this.uploadParams.folderId = _folderId;
       for (var i = 0; i < this.folderTree.length; i++) {
         var node = this.folderTree[i];
         if (node.parentId == _folderId) {
@@ -91,11 +104,6 @@ export default {
           this.findChildren(node, _folderId);
         }
       }
-    },
-    fileMd5: function(val) {
-      // this.$message(val);
-      // this.uploadParams = { fileMd5: val };
-      // this.$refs.upload.submit();
     }
   },
   methods: {
@@ -120,67 +128,56 @@ export default {
     intoFolder: function(folder) {
       this.selectedFolderId.push(folder.id);
     },
-    beforeUpload: function(fileObj, fileList) {
-      var _this = this;
-      var blobSlice =
-          File.prototype.slice ||
-          File.prototype.mozSlice ||
-          File.prototype.webkitSlice,
-        file = fileObj.raw,
-        chunkSize = 100 * 1024 * 1024, // Read in chunks of 100MB
-        chunks = Math.ceil(file.size / chunkSize),
-        currentChunk = 0,
-        spark = new SparkMD5.ArrayBuffer(),
-        fileReader = new FileReader();
-
-      fileReader.onload = function(e) {
-        spark.append(e.target.result); // Append array buffer
-        currentChunk++;
-
-        if (currentChunk < chunks) {
-          loadNext();
-        } else {
-          _this.fileMd5 = spark.end();
+    onChange: function(file, fileList) {
+      for (var j = 0; j < fileList.length; j++) {
+        var _fo = fileList[j];
+        if (_fo.status == "ready") {
+          var _this = this;
+          var spark = new SparkMD5();
+          var fileReader = new FileReader();
+          fileReader.readAsBinaryString(file.raw);
+          //第一次（选取后），状态为ready,第二次（上传）之前是uploading，之后是success
+          fileReader.onload = function(e) {
+            spark.appendBinary(e.target.result);
+            var md5 = spark.end();
+            for (var i = 0; i < fileList.length; i++) {
+              var fo = fileList[i];
+              if (fo.name == file.name) {
+                if (typeof fo.md5 == "undefined") {
+                  _this.$set(fo, "md5", md5);
+                } else {
+                  fo.md5 = md5;
+                }
+                break;
+              }
+            }
+          };
         }
-      };
-
-      fileReader.onerror = function() {
-        console.warn("oops, something went wrong.");
-      };
-
-      function loadNext() {
-        var start = currentChunk * chunkSize,
-          end = start + chunkSize >= file.size ? file.size : start + chunkSize;
-        fileReader.readAsArrayBuffer(blobSlice.call(file, start, end));
       }
-
-      loadNext();
     },
-    foo: function(fileObj, fileList) {
-      var _this = this;
-      var fileReader = new FileReader();
-      var spark = new SparkMD5.ArrayBuffer();
-
-      fileReader.readAsArrayBuffer(fileObj.raw);
-      fileReader.onload = function(e) {
-        spark.append(e.target.result);
-        _this.fileMd5 = spark.end();
-        _this.$refs.upload.submit();
-      };
+    beforeUpload: function(file) {
+      var uploadFileList = this.$refs.upload.$data.uploadFiles;
+      for (var i = 0; i < uploadFileList.length; i++) {
+        var fo = uploadFileList[i];
+        if (fo.name == file.name) {
+          this.uploadParams.docName = fo.name;
+          this.uploadParams.docMd5 = fo.md5;
+          break;
+        }
+      }
     },
-    bar:function(file){
-      this.$message(this.fileMd5);
-      this.uploadParams = { fileMd5: this.fileMd5 };
+    submitUpload() {
+      this.$refs.upload.submit();
     },
-    handleSuccessUpload: function(res, file) {
+    onSuccess: function(res, file) {
       //刷新当前目录
-    },
-    getFildMd5: function(file) {}
+    }
   },
   mounted() {
     var user = JSON.parse(sessionStorage.getItem("user"));
     if (user) {
       this.loginUser = user;
+      this.uploadParams.employeeId = user.employeeId;
       this.queryMyProjects();
     }
   }
