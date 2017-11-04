@@ -29,4 +29,6 @@ export const removeProjectEmployee = params => { return axios.get(`${base}/remov
 
 export const queryMyProjectList = params => { return axios.get(`${base}/myProjectList`, { params: params }); };
 
+export const quickUpload = params => { return axios.post(`${base}/quickUpload`, params).then(res => res.data); };
+
 //export const queryLogListPage = params => { return axios.get(`${base}/logPageList`, { params: params }); };

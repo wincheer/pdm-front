@@ -7,7 +7,7 @@
         <!--项目列表-->
         <el-col>
             <el-card v-for="(o, index) in projectList" :key="index" :body-style="{ padding: '0px'}" :style="{ width: '140px', float:'left',margin:'15px'}">
-                <img src="../../assets/folder.jpg" class="image">
+                <img src="../../assets/folder.png" class="image">
                 <div style="padding: 5px;">
                     <el-tooltip :content="o.projectDesc" effect="light">
                         <span>{{o.projectName}}</span>
