@@ -17,6 +17,7 @@
 
 <script>
 import SparkMD5 from "spark-md5";
+import { quickUpload } from "../../config/api";
 export default {
   data() {
     return {
@@ -58,15 +59,41 @@ export default {
       }
     },
     handelBefore(file) {
-      var uploadFileList = this.$refs.upload.$data.uploadFiles;
+      var _this = this;
+      var uploadFileList = _this.$refs.upload.$data.uploadFiles;
       for (var i = 0; i < uploadFileList.length; i++) {
         var fo = uploadFileList[i];
         if (fo.name == file.name) {
-          this.uploadParams.docName = fo.name;
-          this.uploadParams.docMd5 = fo.md5;
+          _this.uploadParams.docName = fo.name;
+          _this.uploadParams.docMd5 = fo.md5;
           break;
         }
       }
+      //检查是否需要上传
+      // quickUpload(param).then(res => {
+      //   return res;
+      // });
+      return new Promise(function(resolve, reject) {
+        quickUpload(_this.uploadParams).then(response => {
+          if (response.docName ==="SzeliskiBook_20100903_draft.pdf") {
+            reject(response);
+          } else {
+            resolve(response);
+          }
+        });
+      });
+      // var promise = new Promise(function(resolve, reject) {
+      //   var result = quickUpload(_this.uploadParams);
+      //   if (result) {
+      //     resolve(result);
+      //   } else {
+      //     reject(new Error());
+      //   }
+      // });
+
+      // promise.then(function(data) {
+      //   console.log(data);
+      // });
     }
   }
 };
