@@ -22,7 +22,7 @@
       <!--项目目录列表-->
       <el-col>
           <el-card v-for="(o, index) in folderList" :key="index" :body-style="{ padding: '0px'}" :style="{ width: '140px', float:'left',margin:'15px'}">
-              <img src="../../assets/folder.jpg" class="image" @dblclick="intoFolder(o)"/>
+              <img src="../../assets/folder.png" class="image" @dblclick="intoFolder(o)"/>
               <div style="padding: 5px;" >
                   <span>{{o.label}}</span>
               </div>
