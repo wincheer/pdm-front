@@ -59,8 +59,9 @@
 			    <el-table-column prop="upload_employee" label="上传用户" sortable width="150"></el-table-column>
           <el-table-column label="操作">
             <template slot-scope="scope">
-              <el-button size="small"  @click="handlePreview(scope.$index, scope.row)" icon="edit">预览</el-button>
-              <el-button type="danger" size="small" @click="handleDownload(scope.$index, scope.row)" icon="delete">下载</el-button>
+              <!-- <el-button size="small"  @click="handlePreview(scope.$index, scope.row)" icon="edit">预览</el-button> -->
+              <!-- fa fa-fontawesome的icon名称，比如下面例子中，icon名字是cloud-download -->
+              <el-button type="danger" size="small" @click="handleDownload(scope.$index, scope.row)" class="fa fa-cloud-download">下载</el-button>
             </template>
 			    </el-table-column>
 		    </el-table>
@@ -250,6 +251,7 @@ export default {
         let link = document.createElement("a");
         link.href = window.URL.createObjectURL(blob);
         link.download = this.selectedDocument.documentName;
+        document.body.appendChild(link);
         link.click();
       });
     },

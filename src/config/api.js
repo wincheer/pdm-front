@@ -34,8 +34,7 @@ export const quickUpload = params => { return axios.post(`${base}/quickUpload`, 
 export const queryDocmentList = params => { return axios.get(`${base}/docList`, { params: params }); };
 export const queryDocumentVersionList = params => { return axios.get(`${base}/docVerList`, { params: params }); };
 
-export const downloadFile = params => { return axios.get(`${base}/download`, { params: params }); };
+//export const downloadFile = params => { return axios.get(`${base}/download`, { params: params, dataType: 'binary', processData: false, responseType: 'arraybuffer' }); };
+export const downloadFile = params => { return axios.get(`${base}/download`, { params: params, responseType: 'arraybuffer' }); };
 
 export const searchDocmentList = params => { return axios.post(`${base}/docSearchList`, params).then(res => res.data); };
-
-//export const queryLogListPage = params => { return axios.get(`${base}/logPageList`, { params: params }); };
