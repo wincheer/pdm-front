@@ -31,4 +31,6 @@ export const queryMyProjectList = params => { return axios.get(`${base}/myProjec
 
 export const quickUpload = params => { return axios.post(`${base}/quickUpload`, params).then(res => res.data); };
 
+export const queryDocmentList = params => { return axios.get(`${base}/docList`, { params: params }); };
+
 //export const queryLogListPage = params => { return axios.get(`${base}/logPageList`, { params: params }); };

@@ -4,7 +4,7 @@
       <el-col :span='24' class="toolbar" style="padding-bottom: 0px;">
         <el-form :inline="true">
           <el-form-item label="我的项目："> 
-              <el-select v-model="selectedProjectId" placeholder="请选择项目">
+              <el-select v-model="selectedProjectId" placeholder="请选择项目" style="width:150px">
                 <el-option v-for="item in myProjects" :key="item.projectId" :label="item.projectName" :value="item.projectId" />
               </el-select>
           </el-form-item>
@@ -12,10 +12,10 @@
               <el-cascader v-model="selectedFolderId" :props="{value:'id'}" :options="folderTree" change-on-select></el-cascader>
           </el-form-item>
           <el-form-item>
-              <el-button icon="upload2" type="primary" @click.native="uploadFormVisible = true">上传</el-button>
+              <el-button icon="upload" type="primary" @click.native="uploadFormVisible = true">上传</el-button>
           </el-form-item>
           <el-form-item>
-              <el-button type="primary" icon="view">预览</el-button>
+              <el-button icon="search" type="success" @click.native="uploadFormVisible = true">查询</el-button>
           </el-form-item>
 			  </el-form>
       </el-col>
@@ -27,6 +27,14 @@
                   <span>{{o.label}}</span>
               </div>
           </el-card>
+          <el-card v-for="(doc, index) in documentList" :key="index" :body-style="{ padding: '0px'}" :style="{ width: '140px', float:'left',margin:'15px'}">
+              <img src="../../assets/document.png" class="image"/>
+              <div style="padding: 5px;" >
+                  <el-tooltip :content="doc.documentName" effect="light">
+                    <span>{{doc.documentName.substr(0,9)}}</span>
+                  </el-tooltip>
+              </div>
+          </el-card>
       </el-col>
       <!--文件上传对话框-->
       <el-dialog title="上传文件" v-model="uploadFormVisible" :close-on-click-modal="false" size="tiny">
@@ -35,11 +43,12 @@
             action="http://localhost:8080/upload"
             :on-change="onChange"
             :before-upload="beforeUpload"
+            :on-success="onSuccess"
             :auto-upload="false"
             :multiple="true"
             :data="uploadParams">
             <el-button slot="trigger" type="primary">选取文件</el-button>
-            <el-button style="margin-left: 10px;" type="success" @click="submitUpload">上传到服务器</el-button>
+            <el-button icon="upload2" style="margin-left: 10px;" type="success" @click="submitUpload">上传到服务器</el-button>
             <div slot="tip" class="el-upload__tip">单个文件最大不得超过100M。</div>
         </el-upload>
       </el-dialog>
@@ -47,7 +56,7 @@
 </template>
 
 <script>
-import { queryMyProjectList, queryFolderList } from "../../config/api";
+import { queryMyProjectList, queryFolderList ,queryDocmentList} from "../../config/api";
 import SparkMD5 from "spark-md5";
 
 export default {
@@ -60,6 +69,7 @@ export default {
       folderTree: [],
       folderList: [],
       selectedFolderId: [],
+      documentList:[],
       uploadParams: {
         docName:'',
         docMd5:'',
@@ -77,19 +87,7 @@ export default {
       this.uploadParams.projectId = this.selectedProjectId;
       queryFolderList(para).then(res => {
         this.folderTree = res.data;
-        //b--
-        var p_root = [
-          {
-            id: 0,
-            parentId: null,
-            label: "根目录",
-            ownerId: this.selectedProjectId,
-            children: this.folderTree
-          }
-        ];
-        this.folderTree = p_root;
-        //e--
-        this.selectedFolderId = [0];
+        this.selectedFolderId = [this.folderTree[0].id];
       });
     },
     selectedFolderId: function(val) {
@@ -104,6 +102,7 @@ export default {
           this.findChildren(node, _folderId);
         }
       }
+      this.queryFolderDocs(_folderId);
     }
   },
   methods: {
@@ -119,10 +118,18 @@ export default {
         }
       }
     },
+    queryFolderDocs(fid){
+      //获取当前目录下的文档
+      let param = { folderId: fid };
+      queryDocmentList(param).then(res => {
+        this.documentList = res.data;
+      });
+    },
     queryMyProjects: function() {
       let param = { employeeId: this.loginUser.employeeId };
       queryMyProjectList(param).then(res => {
         this.myProjects = res.data;
+        this.selectedProjectId = this.myProjects[0].projectId
       });
     },
     intoFolder: function(folder) {
@@ -171,6 +178,8 @@ export default {
     },
     onSuccess: function(res, file) {
       //刷新当前目录
+      var _folderId = this.selectedFolderId[this.selectedFolderId.length - 1];
+      this.queryFolderDocs(_folderId);
     }
   },
   mounted() {
