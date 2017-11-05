@@ -15,7 +15,7 @@
               <el-button icon="upload" type="primary" @click.native="uploadFormVisible = true">上传</el-button>
           </el-form-item>
           <el-form-item>
-              <el-button icon="search" type="success" @click.native="uploadFormVisible = true">查询</el-button>
+              <el-button icon="search" type="success" @click.native="searchFormVisible = true">文档查询</el-button>
           </el-form-item>
 			  </el-form>
       </el-col>
@@ -28,7 +28,7 @@
               </div>
           </el-card>
           <el-card v-for="(doc, index) in documentList" :key="index" :body-style="{ padding: '0px'}" :style="{ width: '140px', float:'left',margin:'15px'}">
-              <img src="../../assets/document.png" class="image"/>
+              <img src="../../assets/document.png" class="image" @dblclick="intoDocument(doc)"/>
               <div style="padding: 5px;" >
                   <el-tooltip :content="doc.documentName" effect="light">
                     <span>{{doc.documentName.substr(0,9)}}</span>
@@ -52,11 +52,54 @@
             <div slot="tip" class="el-upload__tip">单个文件最大不得超过100M。</div>
         </el-upload>
       </el-dialog>
+      <!--文档操作对话框-->
+      <el-dialog :title="selectedDocument.documentName" v-model="documentFormVisible" :close-on-click-modal="false" size="tiny">
+        <el-table :data="docVerList" highlight-current-row  v-loading="loading" border style="width: 100%;">
+          <el-table-column prop="version" label="版本" sortable width="200"></el-table-column>
+			    <el-table-column prop="upload_employee" label="上传用户" sortable width="150"></el-table-column>
+          <el-table-column label="操作">
+            <template slot-scope="scope">
+              <el-button size="small"  @click="handlePreview(scope.$index, scope.row)" icon="edit">预览</el-button>
+              <el-button type="danger" size="small" @click="handleDownload(scope.$index, scope.row)" icon="delete">下载</el-button>
+            </template>
+			    </el-table-column>
+		    </el-table>
+      </el-dialog>
+      <!--文档搜索对话框-->
+      <el-dialog title="文档搜索" v-model="searchFormVisible" :close-on-click-modal="false" size="small">
+        <el-col :span='24' class="toolbar" style="padding-bottom: 0px;">
+          <el-form :inline="true" :model="filter">
+              <el-form-item>
+                  <el-input v-model="filter.docName" placeholder="文档名"></el-input>
+              </el-form-item>
+              <el-form-item>
+                  <el-button type="primary" @click="queryDocs" icon="search">查询</el-button>
+              </el-form-item>
+          </el-form>
+        </el-col>
+        <el-table :data="docSearchList" highlight-current-row  v-loading="loading" border style="width: 100%;">
+          <el-table-column prop="documentName" label="文件名"></el-table-column>
+			    <!-- <el-table-column prop="projectId" label="项目" sortable></el-table-column> -->
+          <el-table-column prop="folderId" label="路径"></el-table-column>
+          <el-table-column label="详情">
+            <template slot-scope="scope">
+              <el-button size="small"  @click="intoDocument(scope.row)" icon="edit">详情</el-button>
+            </template>
+			    </el-table-column>
+		    </el-table>
+      </el-dialog>
   </section>
 </template>
 
 <script>
-import { queryMyProjectList, queryFolderList ,queryDocmentList} from "../../config/api";
+import {
+  queryMyProjectList,
+  queryFolderList,
+  queryDocmentList,
+  queryDocumentVersionList,
+  downloadFile,
+  searchDocmentList
+} from "../../config/api";
 import SparkMD5 from "spark-md5";
 
 export default {
@@ -69,15 +112,22 @@ export default {
       folderTree: [],
       folderList: [],
       selectedFolderId: [],
-      documentList:[],
+      documentList: [],
+      docVerList: [],
+      selectedDocument: {},
+      selectedDocVersion: {},
       uploadParams: {
-        docName:'',
-        docMd5:'',
-        projectId:'',
-        folderId:'',
-        employeeId:''
+        docName: "",
+        docMd5: "",
+        projectId: "",
+        folderId: "",
+        employeeId: ""
       },
-      uploadFormVisible: false
+      uploadFormVisible: false,
+      documentFormVisible: false,
+      searchFormVisible: false,
+      filter: { docName: "", scope: "" },
+      docSearchList: []
     };
   },
   watch: {
@@ -118,7 +168,7 @@ export default {
         }
       }
     },
-    queryFolderDocs(fid){
+    queryFolderDocs(fid) {
       //获取当前目录下的文档
       let param = { folderId: fid };
       queryDocmentList(param).then(res => {
@@ -129,11 +179,22 @@ export default {
       let param = { employeeId: this.loginUser.employeeId };
       queryMyProjectList(param).then(res => {
         this.myProjects = res.data;
-        this.selectedProjectId = this.myProjects[0].projectId
+        this.selectedProjectId = this.myProjects[0].projectId;
+      });
+    },
+    queryDocVersions: function() {
+      let param = { documentId: this.selectedDocument.documentId };
+      queryDocumentVersionList(param).then(res => {
+        this.docVerList = res.data;
       });
     },
     intoFolder: function(folder) {
       this.selectedFolderId.push(folder.id);
+    },
+    intoDocument: function(document) {
+      this.selectedDocument = document;
+      this.documentFormVisible = true;
+      this.queryDocVersions();
     },
     onChange: function(file, fileList) {
       for (var j = 0; j < fileList.length; j++) {
@@ -180,6 +241,27 @@ export default {
       //刷新当前目录
       var _folderId = this.selectedFolderId[this.selectedFolderId.length - 1];
       this.queryFolderDocs(_folderId);
+    },
+    handlePreview: function(index, row) {},
+    handleDownload: function(index, row) {
+      let param = { fileId: row.file_id };
+      downloadFile(param).then(res => {
+        let blob = new Blob([res.data], { type: "application/octet-stream" });
+        let link = document.createElement("a");
+        link.href = window.URL.createObjectURL(blob);
+        link.download = this.selectedDocument.documentName;
+        link.click();
+      });
+    },
+    queryDocs: function() {
+      let param = {
+        documentName: this.filter.docName,
+        employeeId: this.loginUser.employeeId,
+        projectId: this.selectedProjectId
+      };
+      searchDocmentList(param).then(res => {
+        this.docSearchList = res;
+      });
     }
   },
   mounted() {

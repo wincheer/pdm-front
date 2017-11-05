@@ -32,8 +32,7 @@ let routes = [
         iconCls: 'fa fa-folder-o',
         children: [
             { path: '/private', component: Private, name: '我的私人文档' },
-            { path: '/public', component: Public, name: '项目文档' },
-            { path: '/zero', component: Zero, name: '测试多文件上传' }
+            { path: '/public', component: Public, name: '项目文档' }
         ]
     },
     {

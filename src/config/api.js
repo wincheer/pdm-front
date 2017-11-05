@@ -32,5 +32,10 @@ export const queryMyProjectList = params => { return axios.get(`${base}/myProjec
 export const quickUpload = params => { return axios.post(`${base}/quickUpload`, params).then(res => res.data); };
 
 export const queryDocmentList = params => { return axios.get(`${base}/docList`, { params: params }); };
+export const queryDocumentVersionList = params => { return axios.get(`${base}/docVerList`, { params: params }); };
+
+export const downloadFile = params => { return axios.get(`${base}/download`, { params: params }); };
+
+export const searchDocmentList = params => { return axios.post(`${base}/docSearchList`, params).then(res => res.data); };
 
 //export const queryLogListPage = params => { return axios.get(`${base}/logPageList`, { params: params }); };
