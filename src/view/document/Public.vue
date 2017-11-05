@@ -71,7 +71,7 @@
         <el-col :span='24' class="toolbar" style="padding-bottom: 0px;">
           <el-form :inline="true" :model="filter">
               <el-form-item>
-                  <el-input v-model="filter.docName" placeholder="文档名"></el-input>
+                  <el-input v-model="filter.docName" placeholder="文档名" @keyup.enter.native="queryDocs"></el-input>
               </el-form-item>
               <el-form-item>
                   <el-button type="primary" @click="queryDocs" icon="search">查询</el-button>
@@ -81,10 +81,10 @@
         <el-table :data="docSearchList" highlight-current-row  v-loading="loading" border style="width: 100%;">
           <el-table-column prop="documentName" label="文件名"></el-table-column>
 			    <!-- <el-table-column prop="projectId" label="项目" sortable></el-table-column> -->
-          <el-table-column prop="folderId" label="路径"></el-table-column>
-          <el-table-column label="详情">
+          <el-table-column prop="folderName" label="路径" ></el-table-column>
+          <el-table-column label="操作">
             <template slot-scope="scope">
-              <el-button size="small"  @click="intoDocument(scope.row)" icon="edit">详情</el-button>
+              <el-button size="small"  @click="intoDocument(scope.row)" icon="edit">版本详情</el-button>
             </template>
 			    </el-table-column>
 		    </el-table>
@@ -169,12 +169,28 @@ export default {
         }
       }
     },
+    findNode: function(tree, folder_id) {
+      for (var i = 0; i < tree.length; i++) {
+        if (tree[i].id == folder_id) {
+          return tree[i];
+        } else {
+          if (tree[i].children) {
+            this.findNode(node.children, folder_id);
+          }
+        }
+      }
+    },
     queryFolderDocs(fid) {
       //获取当前目录下的文档
       let param = { folderId: fid };
       queryDocmentList(param).then(res => {
         this.documentList = res.data;
       });
+    },
+    formatPath: function(row, column) {
+      var fullPath;
+      var node = this.findNode(this.folderTree, row.folderId);
+      return node;
     },
     queryMyProjects: function() {
       let param = { employeeId: this.loginUser.employeeId };
