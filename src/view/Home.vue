@@ -12,12 +12,12 @@
             <el-col :span="4" class="userinfo">
                 <el-dropdown trigger="hover">
                     <span class="el-dropdown-link userinfo-inner">
-                        <img :src="this.sysUserAvatar" /> {{sysUserName}}<el-badge class="mark" :value="newFiles" /></el-badge>
-                        
+                        <img :src="this.sysUserAvatar" /> {{sysUserName}}
+                        <!-- <el-badge class="mark" :value="newFiles" /></el-badge> -->
                     </span>
                     <el-dropdown-menu slot="dropdown">
-                        <el-dropdown-item>我的新文件</el-dropdown-item>
-                        <el-dropdown-item>设置</el-dropdown-item>
+                        <!-- <el-dropdown-item>收到的共享文件</el-dropdown-item> -->
+                        <el-dropdown-item @click.native="pwdFormVisible = true">修改密码</el-dropdown-item>
                         <el-dropdown-item divided @click.native="logout">退出登录</el-dropdown-item>
                     </el-dropdown-menu>
                 </el-dropdown>
@@ -76,13 +76,33 @@
                 </div>
             </section>
         </el-col>
+        <!--添加模板的界面-->
+        <el-dialog title="修改密码" v-model="pwdFormVisible" :close-on-click-modal="false" size="tiny">
+          <el-form :model="pwdForm" label-width="100px" :rules="pwdFormRules" ref="pwdForm">
+            <el-form-item label="原密码：" prop="oldPwd">
+              <el-input type="password" v-model="pwdForm.oldPwd" style="width:90%"></el-input>
+            </el-form-item>
+            <el-form-item label="新密码：" prop="newPwd">
+              <el-input v-model="pwdForm.newPwd" style="width:90%"></el-input>
+            </el-form-item>
+            <el-form-item label="重输新密码：" prop="newSecPwd">
+              <el-input v-model="pwdForm.newSecPwd" style="width:90%"></el-input>
+            </el-form-item>
+          </el-form>
+          <div slot="footer" class="dialog-footer">
+            <el-button @click.native="pwdFormVisible = false">取消</el-button>
+            <el-button type="primary" @click.native="updatePwd">提交</el-button>
+          </div>
+        </el-dialog>
     </el-row>
 </template>
 
 <script>
+import { editUser } from "../config/api";
 export default {
   data() {
     return {
+      loginUser: {},
       sysName: "PDM - iData",
       collapsed: false,
       sysUserName: "",
@@ -97,12 +117,57 @@ export default {
         type: [],
         resource: "",
         desc: ""
+      },
+      pwdFormVisible: false,
+      pwdForm: {
+        oldPwd: "",
+        newPwd: "",
+        newSecPwd: ""
+      },
+      pwdFormRules: {
+        oldPwd: [{ required: true, message: "请输入原密码", trigger: "blur" }],
+        newPwd: [{ required: true, message: "请输入新密码", trigger: "blur" }]
       }
     };
   },
   methods: {
     onSubmit() {
       console.log("submit!");
+    },
+    updatePwd: function() {
+      var _this = this;
+      _this.$refs.pwdForm.validate(valid => {
+        if (valid) {
+          if (_this.pwdForm.oldPwd != _this.loginUser.loginPassword) {
+            _this.$message({ message: "原密码错误，重新输入！", type: "warning" });
+          } else {
+            if (_this.pwdForm.newPwd != _this.pwdForm.newSecPwd) {
+              _this.$message({ message: "新密码两次输入的不一致，重新输入！", type: "warning" });
+            } else {
+              let para = {
+                employeeId: _this.loginUser.employeeId,
+                loginPassword: _this.pwdForm.newPwd
+              };
+              editUser(para).then(res => {
+                _this.$message({
+                  message: "更新密码成功，下次请用新密码登录",
+                  type: "success"
+                });
+                _this.loginUser.loginPassword = _this.pwdForm.newPwd;
+                sessionStorage.setItem("user", JSON.stringify(_this.loginUser));
+                _this.pwdForm = {
+                  oldPwd: "",
+                  newPwd: "",
+                  newSecPwd: ""
+                };
+                _this.pwdFormVisible = false;
+              });
+            }
+          }
+        } else {
+          return false;
+        }
+      });
     },
     //退出登录
     logout: function() {
@@ -112,7 +177,7 @@ export default {
       })
         .then(() => {
           sessionStorage.removeItem("user");
-          _this.$router.push("/login");
+          this.$router.push("/login");
         })
         .catch(() => {});
     },
@@ -130,6 +195,7 @@ export default {
     var user = sessionStorage.getItem("user");
     if (user) {
       user = JSON.parse(user);
+      this.loginUser = user;
       this.sysUserName = user.displayName;
       //this.sysUserAvatar = 'https://raw.githubusercontent.com/taylorchen709/markdown-images/master/vueadmin/user.png';
       this.sysUserAvatar = require("../assets/avatar.jpg");

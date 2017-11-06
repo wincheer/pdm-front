@@ -7,7 +7,7 @@
         <el-form-item prop="loginPassword">
             <el-input type="password" v-model="ruleForm2.loginPassword" auto-complete="off" placeholder="密码"></el-input>
         </el-form-item>
-        <el-checkbox v-model="checked" checked class="remember">记住密码</el-checkbox>
+        <!-- <el-checkbox v-model="checked" checked class="remember">记住密码</el-checkbox> -->
         <el-form-item style="width:100%;">
             <el-button type="primary" style="width:100%;" @click.native.prevent="handleSubmit2" :loading="logining">登录</el-button>
         </el-form-item>
@@ -21,8 +21,8 @@ export default {
         return {
             logining: false,
             ruleForm2: {
-                loginName: 'admin',
-                loginPassword: 'iDatapdm2017'
+                loginName: '',
+                loginPassword: ''
             },
             rules2: {
                 loginName: [

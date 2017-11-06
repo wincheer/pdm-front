@@ -44,7 +44,7 @@
 					<el-input v-model="editForm.loginName" style="width:90%"></el-input>
 				</el-form-item>
 				<el-form-item label="登录密码：" prop="loginPassword">
-					<el-input v-model="editForm.loginPassword" style="width:90%"></el-input>
+					<el-input type="password" v-model="editForm.loginPassword" style="width:90%"></el-input>
 				</el-form-item>
 				<!-- <el-form-item label="角色：" prop="role">
 					<el-select v-model="editForm.role" placeholder="请选择">

@@ -31,7 +31,7 @@ let routes = [
         name: '文档操作',
         iconCls: 'fa fa-folder-o',
         children: [
-            { path: '/private', component: Private, name: '我的私人文档' },
+            // { path: '/private', component: Private, name: '我的私人文档' },
             { path: '/public', component: Public, name: '项目文档' }
         ]
     },
@@ -44,7 +44,7 @@ let routes = [
             { path: '/template', component: TemplateList, name: '项目目录模板配置' },
             { path: '/user', component: EmployeeList, name: '用户及权限管理' },
             { path: '/project', component: ProjectList, name: '项目配置' },
-            { path: '/log', component: ActionLogList, name: '查看操作日志' }
+            // { path: '/log', component: ActionLogList, name: '查看操作日志' }
         ]
     },
     {

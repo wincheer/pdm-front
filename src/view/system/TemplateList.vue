@@ -9,13 +9,7 @@
                     </el-select>
                 </el-form-item>
                 <el-form-item>
-                    <el-button type="primary" icon="plus"></el-button>
-                </el-form-item>
-                <el-form-item>
-                    <el-button type="primary" icon="edit"></el-button>
-                </el-form-item>
-                <el-form-item>
-                    <el-button type="danger" icon="delete"></el-button>
+                    <el-button type="primary" icon="plus" @click.native="tplFormVisible = true"></el-button>
                 </el-form-item>
             </el-form>
         </el-col>
@@ -45,6 +39,21 @@
             <el-button type="primary" @click.native="saveTemplateFolder" :loading="addLoading">提交</el-button>
           </div>
         </el-dialog>
+        <!--添加模板的界面-->
+        <el-dialog title="新建模板" v-model="tplFormVisible" :close-on-click-modal="false" size="tiny">
+          <el-form :model="addTplForm" label-width="100px" :rules="addTplFormRules" ref="addTplForm">
+            <el-form-item label="模板名称：" prop="templateName">
+              <el-input v-model="addTplForm.templateName" style="width:90%"></el-input>
+            </el-form-item>
+            <el-form-item label="描述：" prop="templateDesc">
+              <el-input v-model="addTplForm.templateDesc" style="width:90%"></el-input>
+            </el-form-item>
+          </el-form>
+          <div slot="footer" class="dialog-footer">
+            <el-button @click.native="tplFormVisible = false">取消</el-button>
+            <el-button type="primary" @click.native="saveTemplate" :loading="addLoading">提交</el-button>
+          </div>
+        </el-dialog>
     </section>
 </template>
 
@@ -53,7 +62,8 @@ import {
   queryTemplateList,
   queryTemplateFolderList,
   insertTemplateFolder,
-  removeTemplateFolder
+  removeTemplateFolder,
+  insertTemplate
 } from "../../config/api";
 export default {
   data() {
@@ -84,7 +94,18 @@ export default {
         templateFolderName: [
           { required: true, message: "请输入目录名", trigger: "blur" }
         ]
-      }
+      },
+      tplFormVisible:false,
+      addTplForm:{
+        templateName: "",
+        templateDesc: "",
+        isDelete: 0
+      },
+      addTplFormRules: {
+        templateName: [
+          { required: true, message: "请输入模板名称", trigger: "blur" }
+        ]
+      },
     };
   },
   methods: {
@@ -127,6 +148,23 @@ export default {
             });
             this.addFormVisible = false;
             this.queryTemplateFolders();
+          });
+        }
+      });
+    },
+    saveTemplate(){
+      this.$refs.addTplForm.validate(valid => {
+        if (valid) {
+          this.addLoading = true;
+          let para = Object.assign({}, this.addTplForm);
+          insertTemplate(para).then(res => {
+            this.addLoading = false;
+            this.$message({
+              message: "提交成功",
+              type: "success"
+            });
+            this.tplFormVisible = false;
+            this.queryTemplates();
           });
         }
       });
