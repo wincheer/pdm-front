@@ -83,7 +83,7 @@
         <!-- 分配项目成员 -->
         <el-dialog title="分配项目组成员" v-model="assignMemberVisible" :close-on-click-modal="false" size="tiny">
           <el-col :span="24" class="toolbar" style="padding-bottom: 0px;">
-            {{selectedProject.projectDesc}}
+            {{selectedProject.projectName}}
             <el-button type="primary" @click="handleAdd" icon="plus"></el-button>
           </el-col>
           <el-table :data="projectEmployeeList" highlight-current-row  v-loading="loading" border style="width: 100%;">

@@ -12,7 +12,7 @@
               <el-cascader v-model="selectedFolderId" :props="{value:'id'}" :options="folderTree" change-on-select></el-cascader>
           </el-form-item>
           <el-form-item>
-              <el-button icon="upload" type="primary" @click.native="uploadFormVisible = true">上传</el-button>
+              <el-button icon="upload" type="primary" @click.native="uploadFormVisible = true" v-if="isUploadloadAllow">上传</el-button>
           </el-form-item>
           <el-form-item>
               <el-button icon="search" type="success" @click.native="searchFormVisible = true">文档查询</el-button>
@@ -99,7 +99,8 @@ import {
   queryDocmentList,
   queryDocumentVersionList,
   downloadFile,
-  searchDocmentList
+  searchDocmentList,
+  queryEmployeeProjectList
 } from "../../config/api";
 import SparkMD5 from "spark-md5";
 
@@ -107,6 +108,8 @@ export default {
   data() {
     return {
       loginUser: {},
+      employeeProjectList: [],
+      isUploadloadAllow: false,
       loading: false,
       myProjects: [],
       selectedProjectId: "",
@@ -280,6 +283,26 @@ export default {
       searchDocmentList(param).then(res => {
         this.docSearchList = res;
       });
+    },
+    queryEmployeeProjects: function() {
+      let param = {
+        employeeId: this.loginUser.employeeId
+      };
+      queryEmployeeProjectList(param).then(res => {
+        this.employeeProjectList = res.data;
+        this.checkUploadAllow();
+      });
+    },
+    checkUploadAllow: function() {
+      var result = false;
+      for (var i = 0; i < this.employeeProjectList.length; i++) {
+        var ep = this.employeeProjectList[i];
+        if(ep.projectId==this.selectedProjectId){
+          result = (4 - ep.roleId) > 0;
+          break;
+        }
+      }
+      this.isUploadloadAllow = result;
     }
   },
   mounted() {
@@ -288,6 +311,7 @@ export default {
       this.loginUser = user;
       this.uploadParams.employeeId = user.employeeId;
       this.queryMyProjects();
+      this.queryEmployeeProjects();
     }
   }
 };

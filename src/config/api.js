@@ -26,6 +26,7 @@ export const insertFolder = params => { return axios.post(`${base}/insertFolder`
 export const removeFolder = params => { return axios.get(`${base}/removeFolder`, { params: params }); };
 
 export const queryProjectEmployeeList = params => { return axios.get(`${base}/projectEmployeeList`, { params: params }); };
+export const queryEmployeeProjectList = params => { return axios.get(`${base}/employeeProjectList`, { params: params }); };
 export const editProjectEmployee = params => { return axios.post(`${base}/editEmployeeProject`, params).then(res => res.data); };
 export const removeProjectEmployee = params => { return axios.get(`${base}/removeProjectEmployee`, { params: params }); };
 
