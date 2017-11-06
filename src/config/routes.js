@@ -29,6 +29,7 @@ let routes = [
         path: '/',
         component: Home,
         name: '文档操作',
+        role:4,
         iconCls: 'fa fa-folder-o',
         children: [
             // { path: '/private', component: Private, name: '我的私人文档' },
@@ -39,6 +40,7 @@ let routes = [
         path: '/',
         component: Home,
         name: '系统配置',
+        role:1,
         iconCls: 'fa fa-cog',
         children: [
             { path: '/template', component: TemplateList, name: '项目目录模板配置' },

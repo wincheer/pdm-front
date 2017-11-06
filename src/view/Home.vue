@@ -5,9 +5,9 @@
                 {{collapsed?'':sysName}}
             </el-col>
             <el-col :span="10">
-                <div class="tools" @click.prevent="collapse">
+                <!-- <div class="tools" @click.prevent="collapse">
                     <i class="fa fa-align-justify"></i>
-                </div>
+                </div> -->
             </el-col>
             <el-col :span="4" class="userinfo">
                 <el-dropdown trigger="hover">
@@ -27,11 +27,14 @@
             <aside :class="collapsed?'menu-collapsed':'menu-expanded'">
                 <!--导航菜单-->
                 <el-menu :default-active="$route.path" class="el-menu-vertical-demo" unique-opened router v-show="!collapsed">
-                    <template v-for="(item,index) in $router.options.routes" v-if="!item.hidden">
+                    <template v-for="(item,index) in $router.options.routes" v-if="!item.hidden&&(item.role>=loginUser.role)">
                         <el-submenu :index="index+''" v-if="!item.leaf">
                             <template slot="title">
-                                <i :class="item.iconCls"></i>{{item.name}}</template>
-                            <el-menu-item v-for="child in item.children" :index="child.path" :key="child.path" v-if="!child.hidden">{{child.name}}</el-menu-item>
+                                <i :class="item.iconCls"></i>{{item.name}}
+                            </template>
+                            <el-menu-item v-for="child in item.children" :index="child.path" :key="child.path" v-if="!child.hidden">
+                              {{child.name}}
+                            </el-menu-item>
                         </el-submenu>
                         <el-menu-item v-if="item.leaf&&item.children.length>0" :index="item.children[0].path">
                             <i :class="item.iconCls"></i>{{item.children[0].name}}</el-menu-item>
@@ -189,6 +192,15 @@ export default {
       this.$refs.menuCollapsed.getElementsByClassName(
         "submenu-hook-" + i
       )[0].style.display = status ? "block" : "none";
+    },
+    contains: function(arr, obj) {
+      var i = arr.length;
+      while (i--) {
+        if (arr[i] === obj) {
+          return true;
+        }
+      }
+      return false;
     }
   },
   mounted() {
