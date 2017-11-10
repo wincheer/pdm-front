@@ -12,7 +12,8 @@ Vue.use(ElementUI)
 Vue.use(Vuex)
 
 const router = new VueRouter({
-    mode: 'history',
+    mode: 'hash',
+    base: '/', 
     routes: routes
 })
 
