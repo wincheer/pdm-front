@@ -1,6 +1,5 @@
 import axios from 'axios';
-
-let base = 'http://192.168.1.102:8080';
+import { base } from "./remote";
 
 export const requestLogin = params => { return axios.post(`${base}/login`, params).then(res => res.data); };
 

@@ -102,6 +102,7 @@ import {
   searchDocmentList,
   queryEmployeeProjectList
 } from "../../config/api";
+import { base } from "../../config/remote";
 import SparkMD5 from "spark-md5";
 
 export default {
@@ -264,15 +265,10 @@ export default {
     },
     handlePreview: function(index, row) {},
     handleDownload: function(index, row) {
-      let param = { fileId: row.file_id };
-      downloadFile(param).then(res => {
-        let blob = new Blob([res.data], { type: "application/octet-stream" });
-        let link = document.createElement("a");
-        link.href = window.URL.createObjectURL(blob);
-        link.download = this.selectedDocument.documentName;
-        document.body.appendChild(link);
-        link.click();
-      });
+      let link = document.createElement("a");
+      link.href = base + "/download?fileId=" + row.file_id+"&docId="+row.document_id;
+      link.target = "_BLANK"
+      link.click();
     },
     queryDocs: function() {
       let param = {
@@ -297,8 +293,8 @@ export default {
       var result = false;
       for (var i = 0; i < this.employeeProjectList.length; i++) {
         var ep = this.employeeProjectList[i];
-        if(ep.projectId==this.selectedProjectId){
-          result = (4 - ep.roleId) > 0;
+        if (ep.projectId == this.selectedProjectId) {
+          result = 4 - ep.roleId > 0;
           break;
         }
       }
