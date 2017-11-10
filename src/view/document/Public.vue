@@ -222,12 +222,12 @@ export default {
         var _fo = fileList[j];
         if (_fo.status == "ready") {
           var _this = this;
-          var spark = new SparkMD5();
+          var spark = new SparkMD5.ArrayBuffer();
           var fileReader = new FileReader();
-          fileReader.readAsBinaryString(file.raw);
+          fileReader.readAsArrayBuffer(file.raw); 
           //第一次（选取后），状态为ready,第二次（上传）之前是uploading，之后是success
           fileReader.onload = function(e) {
-            spark.appendBinary(e.target.result);
+            spark.append(e.target.result);
             var md5 = spark.end();
             for (var i = 0; i < fileList.length; i++) {
               var fo = fileList[i];
