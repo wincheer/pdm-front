@@ -6,10 +6,13 @@ import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-default/index.css'
 import Vuex from 'vuex'
 import 'font-awesome/css/font-awesome.min.css'
+import promise from 'es6-promise'
 
 Vue.use(VueRouter)
 Vue.use(ElementUI)
 Vue.use(Vuex)
+
+promise.polyfill()
 
 const router = new VueRouter({
     mode: 'hash',
