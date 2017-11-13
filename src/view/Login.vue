@@ -53,8 +53,9 @@ export default {
                                 type: 'error'
                             });
                         } else {
+                            _this.$store.commit('setLoginUser',data);
                             sessionStorage.setItem('user', JSON.stringify(data));
-                            this.$router.push({ path: '/public' });
+                            _this.$router.push({ path: '/public' });
                         }
                     });
                 } else {
