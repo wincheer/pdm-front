@@ -22,13 +22,13 @@
       <!--项目目录列表-->
       <el-col>
           <el-card v-for="(o, index) in folderList" :key="index" :body-style="{ padding: '0px'}" :style="{ width: '140px', float:'left',margin:'15px'}">
-              <img src="../../assets/folder.png" class="image" @dblclick="intoFolder(o)"/>
+              <img :src="folderIcon" class="image" @dblclick="intoFolder(o)"/>
               <div style="padding: 5px;" >
                   <span>{{o.label}}</span>
               </div>
           </el-card>
           <el-card v-for="(doc, index) in documentList" :key="index" :body-style="{ padding: '0px'}" :style="{ width: '140px', float:'left',margin:'15px'}">
-              <img src="../../assets/document.png" class="image" @dblclick="intoDocument(doc)"/>
+              <img :src="documentIcon" class="image" @dblclick="intoDocument(doc)"/>
               <div style="padding: 5px;" >
                   <el-tooltip :content="doc.documentName" effect="light">
                     <span>{{doc.documentName.substr(0,9)}}</span>
@@ -104,11 +104,15 @@ import {
 } from "../../config/api";
 import { base } from "../../config/remote";
 import SparkMD5 from "spark-md5";
+import folderIcon from "../../assets/folder.png"
+import documentIcon from "../../assets/document.png"
 
 export default {
   data() {
     return {
       loginUser: {},
+      folderIcon:folderIcon,
+      documentIcon:documentIcon,
       employeeProjectList: [],
       isUploadloadAllow: false,
       loading: false,

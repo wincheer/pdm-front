@@ -102,6 +102,7 @@
 
 <script>
 import { editUser } from "../config/api";
+import avatar from "../assets/avatar.jpg"
 export default {
   data() {
     return {
@@ -109,7 +110,7 @@ export default {
       sysName: "PDM - iData",
       collapsed: false,
       sysUserName: "",
-      sysUserAvatar: "../assets/avatar.jpg",
+      sysUserAvatar: avatar,
       newFiles: 3,
       form: {
         name: "",
