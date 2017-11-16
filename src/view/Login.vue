@@ -5,7 +5,7 @@
             <el-input type="text" v-model="ruleForm2.loginName" auto-complete="off" placeholder="账号"></el-input>
         </el-form-item>
         <el-form-item prop="loginPassword">
-            <el-input type="password" v-model="ruleForm2.loginPassword" auto-complete="off" placeholder="密码"></el-input>
+            <el-input type="password" v-model="ruleForm2.loginPassword" auto-complete="off" placeholder="密码" @keydown.enter.native="handleSubmit2"></el-input>
         </el-form-item>
         <!-- <el-checkbox v-model="checked" checked class="remember">记住密码</el-checkbox> -->
         <el-form-item style="width:100%;">

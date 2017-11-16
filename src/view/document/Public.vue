@@ -31,7 +31,7 @@
               <img :src="documentIcon" class="image" @dblclick="intoDocument(doc)"/>
               <div style="padding: 5px;" >
                   <el-tooltip :content="doc.documentName" effect="light">
-                    <span>{{doc.documentName.substr(0,9)}}</span>
+                    <span>{{doc.documentName|formatDocName}}</span>
                   </el-tooltip>
               </div>
           </el-card>
@@ -104,15 +104,15 @@ import {
 } from "../../config/api";
 import { base } from "../../config/remote";
 import SparkMD5 from "spark-md5";
-import folderIcon from "../../assets/folder.png"
-import documentIcon from "../../assets/document.png"
+import folderIcon from "../../assets/folder.png";
+import documentIcon from "../../assets/document.png";
 
 export default {
   data() {
     return {
       loginUser: {},
-      folderIcon:folderIcon,
-      documentIcon:documentIcon,
+      folderIcon: folderIcon,
+      documentIcon: documentIcon,
       employeeProjectList: [],
       isUploadloadAllow: false,
       loading: false,
@@ -138,6 +138,11 @@ export default {
       filter: { docName: "", scope: "" },
       docSearchList: []
     };
+  },
+  filters:{
+    formatDocName:function(value){
+      return value.substr(0,9);
+    }
   },
   watch: {
     selectedProjectId: function(val) {
@@ -228,7 +233,7 @@ export default {
           var _this = this;
           var spark = new SparkMD5.ArrayBuffer();
           var fileReader = new FileReader();
-          fileReader.readAsArrayBuffer(file.raw); 
+          fileReader.readAsArrayBuffer(file.raw);
           //第一次（选取后），状态为ready,第二次（上传）之前是uploading，之后是success
           fileReader.onload = function(e) {
             spark.append(e.target.result);
@@ -270,8 +275,9 @@ export default {
     handlePreview: function(index, row) {},
     handleDownload: function(index, row) {
       let link = document.createElement("a");
-      link.href = base + "/download?fileId=" + row.file_id+"&docId="+row.document_id;
-      link.target = "_BLANK"
+      link.href =
+        base + "/download?fileId=" + row.file_id + "&docId=" + row.document_id;
+      link.target = "_BLANK";
       link.click();
     },
     queryDocs: function() {
@@ -306,13 +312,15 @@ export default {
     }
   },
   mounted() {
-    var user = JSON.parse(sessionStorage.getItem("user"));
-    if (user) {
-      this.loginUser = user;
-      this.uploadParams.employeeId = user.employeeId;
-      this.queryMyProjects();
-      this.queryEmployeeProjects();
-    }
+    this.$nextTick(function() {
+      var user = JSON.parse(sessionStorage.getItem("user"));
+      if (user) {
+        this.loginUser = user;
+        this.uploadParams.employeeId = user.employeeId;
+        this.queryMyProjects();
+        this.queryEmployeeProjects();
+      }
+    });
   }
 };
 </script>
