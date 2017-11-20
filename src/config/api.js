@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { base } from "./remote";
+//import base from "./remote";
 
 export const requestLogin = params => { return axios.post(`${base}/login`, params).then(res => res.data); };
 

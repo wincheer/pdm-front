@@ -102,10 +102,12 @@ import {
   searchDocmentList,
   queryEmployeeProjectList
 } from "../../config/api";
+//import * as API from "../../config/api";
 import { base } from "../../config/remote";
 import SparkMD5 from "spark-md5";
 import folderIcon from "../../assets/folder.png";
-import documentIcon from "../../assets/document.png";
+//import documentIcon from "../../assets/document.png";
+import documentIcon from "@/assets/document.png";
 
 export default {
   data() {
@@ -205,6 +207,7 @@ export default {
       var node = this.findNode(this.folderTree, row.folderId);
       return node;
     },
+    //API.queryMyProjects(){...}
     queryMyProjects: function() {
       let param = { employeeId: this.loginUser.employeeId };
       queryMyProjectList(param).then(res => {
